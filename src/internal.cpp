@@ -1,6 +1,43 @@
 #include "internal.h"
 
+#include <DbgHelp.h>
+#include <processthreadsapi.h>
+
+#include <vector>
+
+#include "exception_info.h"
+
+#pragma comment(lib, "DbgHelp.lib")
+
 using namespace crashlog;
+
+std::vector<Address> crashlog::internal::createStackTrace(EXCEPTION_POINTERS* ptr) {
+	std::vector<Address> addresses;
+
+	CONTEXT context = *ptr->ContextRecord;
+	STACKFRAME64 stackframe;
+	ZeroMemory(&stackframe, sizeof(stackframe));
+	stackframe.AddrPC.Offset = context.Rip;
+	stackframe.AddrPC.Mode = AddrModeFlat;
+	stackframe.AddrFrame.Offset = context.Rbp;
+	stackframe.AddrFrame.Mode = AddrModeFlat;
+	stackframe.AddrStack.Offset = context.Rsp;
+	stackframe.AddrStack.Mode = AddrModeFlat;
+
+	while (StackWalk64(
+		IMAGE_FILE_MACHINE_AMD64,
+		GetCurrentProcess(),
+		GetCurrentThread(),
+		&stackframe,
+		&context,
+		NULL,
+		NULL,
+		NULL,
+		NULL)) {
+		addresses.push_back(parseAddress((void*&)stackframe.AddrPC.Offset));
+	}
+	return addresses;
+}
 
 std::optional<AccessViolationInfo> crashlog::internal::parseViolationInfo(EXCEPTION_RECORD* record) {
 	bool isAccessViolation = record->ExceptionCode == EXCEPTION_ACCESS_VIOLATION;

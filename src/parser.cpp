@@ -1,5 +1,6 @@
 #include "parser.h"
 
+#include <DbgHelp.h>
 #include <windows.h>
 
 #include <format>
@@ -9,7 +10,14 @@
 #include "exception_info.h"
 #include "internal.h"
 
+#pragma comment(lib, "DbgHelp.lib")
+
 using namespace crashlog;
+
+void crashlog::initSym() {
+	SymSetOptions(SYMOPT_LOAD_LINES);
+	SymInitialize(GetCurrentProcess(), NULL, TRUE);
+}
 
 ExceptionInfo crashlog::parseException(EXCEPTION_POINTERS* input) {
 	DWORD exceptionCode = input->ExceptionRecord->ExceptionCode;
@@ -21,6 +29,7 @@ ExceptionInfo crashlog::parseException(EXCEPTION_POINTERS* input) {
 	memset(&info, 0, sizeof(info));
 	info.exceptionCode = exceptionCode;
 	info.violationInfo = violationInfo;
+	info.stacktrace = crashlog::internal::createStackTrace(input);
 	info.isNonContinuable = isNonContinuable;
 	info.addressAt = addressAt;
 	return info;
@@ -30,11 +39,8 @@ std::string crashlog::exceptionInfoToString(ExceptionInfo const& info) {
 	std::stringstream stream;
 
 	Address address = info.addressAt;
-	if (address.symbol.has_value()) {
-		stream << std::format("Address={} ({})", address.symbol.value(), address.rawAddress) << std::endl;
-	} else {
-		stream << std::format("Address={}", address.rawAddress) << std::endl;
-	}
+	stream << std::format("Address={}", addressToString(address)) << std::endl;
+
 	auto exceptionName = crashlog::parseExceptionCode(info.exceptionCode);
 	if (!exceptionName.has_value()) {
 		exceptionName = "UNKNOWN";
@@ -49,12 +55,20 @@ std::string crashlog::exceptionInfoToString(ExceptionInfo const& info) {
 	return stream.str();
 }
 
+std::string crashlog::createStackTraceString(ExceptionInfo const& info) {
+	std::stringstream stream;
+	for (Address const& addr : info.stacktrace) {
+		stream << addressToString(addr) << std::endl;
+	}
+	return stream.str();
+}
+
 std::string crashlog::createStackDumpString(EXCEPTION_POINTERS* ptr) {
 	std::stringstream stream;
-	stream << std::format("RAX=0x{:x}, RCX=0x{:x}, RDX=0x{:x}, RBX=0x{:x}", ptr->ContextRecord->Rax, ptr->ContextRecord->Rcx, ptr->ContextRecord->Rdx, ptr->ContextRecord->Rbx) << std::endl;
-	stream << std::format("Rsp=0x{:x}, Rbp=0x{:x}, Rsi=0x{:x}, Rdi=0x{:x}", ptr->ContextRecord->Rsp, ptr->ContextRecord->Rbp, ptr->ContextRecord->Rsi, ptr->ContextRecord->Rdi) << std::endl;
-	stream << std::format("R8=0x{:x}, R9=0x{:x}, R10=0x{:x}, R11=0x{:x}", ptr->ContextRecord->R8, ptr->ContextRecord->R9, ptr->ContextRecord->R10, ptr->ContextRecord->R11) << std::endl;
-	stream << std::format("R9=0x{:x}, R10=0x{:x}, R11=0x{:x}, R12=0x{:x}", ptr->ContextRecord->R9, ptr->ContextRecord->R10, ptr->ContextRecord->R11, ptr->ContextRecord->R12) << std::endl;
-	stream << std::format("R13=0x{:x} R14=0x{:x}, R15=0x{:x}, Rip=0x{:x}", ptr->ContextRecord->R13, ptr->ContextRecord->R14, ptr->ContextRecord->R15, ptr->ContextRecord->Rip) << std::endl;
+	stream << std::format("RAX={}, RCX={}, RDX={}, RBX={}", rawAddressToString(ptr->ContextRecord->Rax), rawAddressToString(ptr->ContextRecord->Rcx), rawAddressToString(ptr->ContextRecord->Rdx), rawAddressToString(ptr->ContextRecord->Rbx)) << std::endl;
+	stream << std::format("Rsp={}, Rbp={}, Rsi={}, Rdi={}", rawAddressToString(ptr->ContextRecord->Rsp), rawAddressToString(ptr->ContextRecord->Rbp), rawAddressToString(ptr->ContextRecord->Rsi), rawAddressToString(ptr->ContextRecord->Rdi)) << std::endl;
+	stream << std::format("R8={}, R9={}, R10={}, R11={}", rawAddressToString(ptr->ContextRecord->R8), rawAddressToString(ptr->ContextRecord->R9), rawAddressToString(ptr->ContextRecord->R10), rawAddressToString(ptr->ContextRecord->R11)) << std::endl;
+	stream << std::format("R9={}, R10={}, R11={}, R12={}", rawAddressToString(ptr->ContextRecord->R9), rawAddressToString(ptr->ContextRecord->R10), rawAddressToString(ptr->ContextRecord->R11), rawAddressToString(ptr->ContextRecord->R12)) << std::endl;
+	stream << std::format("R13={} R14={}, R15={}, Rip={}", rawAddressToString(ptr->ContextRecord->R13), rawAddressToString(ptr->ContextRecord->R14), rawAddressToString(ptr->ContextRecord->R15), rawAddressToString(ptr->ContextRecord->Rip)) << std::endl;
 	return stream.str();
 }

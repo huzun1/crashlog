@@ -1,19 +1,70 @@
 
 #include "exception_info.h"
 
+#include <DbgHelp.h>
+#include <processthreadsapi.h>
 #include <windows.h>
 
+#include <cstdint>
+#include <iomanip>
 #include <map>
 #include <optional>
-#include <system_error>
+#include <sstream>
 
 using namespace crashlog;
 
 Address crashlog::parseAddress(void* rawAddress) {
+	BYTE symbolBuffer[sizeof(SYMBOL_INFO) + MAX_SYM_NAME] = {};
+	SYMBOL_INFO* symbol = (SYMBOL_INFO*)symbolBuffer;
+	symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
+	symbol->MaxNameLen = MAX_SYM_NAME;
+
+	std::string symboled;
+	bool result = SymFromAddr(GetCurrentProcess(), reinterpret_cast<uintptr_t>(rawAddress), nullptr, symbol);
+	if (result) {
+		symboled = symbol->Name;
+	}
+
+	std::optional<LineInfo> lineInfo;
+	IMAGEHLP_LINE64 line;
+	memset(&line, 0, sizeof(IMAGEHLP_LINE64));
+	line.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
+	DWORD dwDisplacement;
+	if (SymGetLineFromAddr64(GetCurrentProcess(), reinterpret_cast<uintptr_t>(rawAddress), &dwDisplacement, &line)) {
+		lineInfo = LineInfo{
+			line.FileName,
+			(int)line.LineNumber,
+		};
+	}
+
 	return {
 		rawAddress,
-		""};
+		symboled,
+		lineInfo};
 };
+
+std::string crashlog::addressToString(Address const& address) {
+	std::string rawAddress = rawAddressToString(reinterpret_cast<uintptr_t>(address.rawAddress));
+
+	std::ostringstream str;
+	if (address.lineInfo.has_value()) {
+		LineInfo info = address.lineInfo.value();
+		str << std::format("{} L{} - ", info.fileName, info.lineNumber);
+	}
+	if (address.symbol.has_value()) {
+		str << std::format("{} ({})", address.symbol.value(), address.rawAddress);
+	} else {
+		str << rawAddress;
+	}
+
+	return str.str();
+}
+
+std::string crashlog::rawAddressToString(uintptr_t ptr) {
+	std::ostringstream str;
+	str << "0x" << std::setw(12) << std::setfill('0') << std::hex << ptr;
+	return str.str();
+}
 
 std::optional<std::string> crashlog::parseExceptionCode(DWORD exCode) {
 	std::map<DWORD, std::string> exceptions = {
