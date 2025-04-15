@@ -43,10 +43,7 @@ void crashlog::loadSym() {
 			IMAGEHLP_MODULE64 modInfo;
 			memset(&modInfo, 0, sizeof(modInfo));
 			modInfo.SizeOfStruct = sizeof(modInfo);
-
-			if (SymGetModuleInfo64(GetCurrentProcess(), baseAddr, &modInfo)) {
-				printf("Module loaded: %s\n", modInfo.LoadedPdbName);
-			}
+			SymGetModuleInfo64(GetCurrentProcess(), baseAddr, &modInfo);
 		}
 	}
 }
