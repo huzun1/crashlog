@@ -3,9 +3,7 @@
 #include <Windows.h>
 #include <bcrypt.h>
 #include <minwindef.h>
-#include <winnt.h>
 
-#include <cstdint>
 #include <optional>
 #include <string>
 

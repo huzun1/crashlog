@@ -9,6 +9,8 @@ LONG WINAPI TopLevelExceptionFilter(struct _EXCEPTION_POINTERS *ExceptionInfo) {
 	printf("\n======================================\n");
 	printf("An exception has been occured!\n");
 	printf("%s\n", crashlog::exceptionInfoToString(info).c_str());
+	printf("Stack Dumps:\n");
+	printf("%s\n", crashlog::createStackDumpString(ExceptionInfo).c_str());
 
 	return 0;
 }
