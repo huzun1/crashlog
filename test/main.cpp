@@ -4,8 +4,9 @@
 #include <cstdio>
 
 LONG WINAPI TopLevelExceptionFilter(struct _EXCEPTION_POINTERS *ExceptionInfo) {
-	crashlog::loadSym();
 	crashlog::initSym();
+	crashlog::loadSym();
+
 	auto info = crashlog::parseException(ExceptionInfo);
 	printf("\n======================================\n");
 	printf("An exception has been occured!\n");

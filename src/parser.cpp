@@ -17,7 +17,7 @@ using namespace crashlog;
 
 void crashlog::initSym() {
 	SymSetOptions(SYMOPT_LOAD_LINES);
-	SymInitialize(GetCurrentProcess(), NULL, TRUE);
+	SymInitialize(GetCurrentProcess(), NULL, FALSE);
 }
 
 void crashlog::loadSym() {
@@ -39,6 +39,14 @@ void crashlog::loadSym() {
 				0,
 				NULL,
 				0);
+
+			IMAGEHLP_MODULE64 modInfo;
+			memset(&modInfo, 0, sizeof(modInfo));
+			modInfo.SizeOfStruct = sizeof(modInfo);
+
+			if (SymGetModuleInfo64(GetCurrentProcess(), baseAddr, &modInfo)) {
+				printf("Module loaded: %s\n", modInfo.LoadedPdbName);
+			}
 		}
 	}
 }
