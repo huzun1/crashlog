@@ -14,15 +14,7 @@ target_include_directories(crashlog PUBLIC
 install(TARGETS crashlog
     EXPORT crashlogTargets
     ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib
-    RUNTIME DESTINATION bin
 )
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/
     DESTINATION include
-    FILES_MATCHING PATTERN "*.h"
-)
-install(EXPORT crashlogTargets
-    FILE crashlogTargets.cmake
-    NAMESPACE crashlog::
-    DESTINATION lib/cmake/crashlog
 )
