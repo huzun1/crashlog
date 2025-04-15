@@ -9,4 +9,23 @@ add_library(crashlog STATIC
     parser.h
 )
 
-target_include_directories(crashlog PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(crashlog PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:include>
+)
+
+install(TARGETS crashlog
+    EXPORT crashlogTargets
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+    RUNTIME DESTINATION bin
+)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/
+    DESTINATION include
+    FILES_MATCHING PATTERN "*.h"
+)
+install(EXPORT crashlogTargets
+    FILE crashlogTargets.cmake
+    NAMESPACE crashlog::
+    DESTINATION lib/cmake/crashlog
+)
