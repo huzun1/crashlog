@@ -1,6 +1,8 @@
 #include <crashlog/exception_info.h>
 #include <crashlog/internal.h>
 #include <crashlog/parser.h>
+#include <processthreadsapi.h>
+#include <psapi.h>
 #include <windows.h>
 
 #include <format>
@@ -16,6 +18,29 @@ using namespace crashlog;
 void crashlog::initSym() {
 	SymSetOptions(SYMOPT_LOAD_LINES);
 	SymInitialize(GetCurrentProcess(), NULL, TRUE);
+}
+
+void crashlog::loadSym() {
+	HMODULE modules[1024];
+	DWORD cbNeeded;
+	if (EnumProcessModules(GetCurrentProcess(), modules, sizeof(modules), &cbNeeded)) {
+		for (unsigned int i = 0; i < (cbNeeded / sizeof(HMODULE)); i++) {
+			TCHAR moduleFileName[MAX_PATH];
+			if (!GetModuleFileNameEx(GetCurrentProcess(), modules[i], moduleFileName, sizeof(moduleFileName) / sizeof(TCHAR))) {
+				continue;
+			}
+			DWORD64 baseAddr = (DWORD64)modules[i];
+			SymLoadModuleEx(
+				GetCurrentProcess(),
+				NULL,
+				moduleFileName,
+				NULL,
+				baseAddr,
+				0,
+				NULL,
+				0);
+		}
+	}
 }
 
 ExceptionInfo crashlog::parseException(EXCEPTION_POINTERS* input) {

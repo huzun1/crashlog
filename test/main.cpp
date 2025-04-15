@@ -3,8 +3,8 @@
 
 #include <cstdio>
 
-
 LONG WINAPI TopLevelExceptionFilter(struct _EXCEPTION_POINTERS *ExceptionInfo) {
+	crashlog::loadSym();
 	crashlog::initSym();
 	auto info = crashlog::parseException(ExceptionInfo);
 	printf("\n======================================\n");

@@ -5,10 +5,9 @@
 #include "exception_info.h"
 
 namespace crashlog {
-struct StackDump {
-};
-
 void initSym();
+
+void loadSym();
 
 ExceptionInfo parseException(EXCEPTION_POINTERS *);
 
