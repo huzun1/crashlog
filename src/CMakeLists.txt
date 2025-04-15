@@ -15,6 +15,6 @@ install(TARGETS crashlog
     EXPORT crashlogTargets
     ARCHIVE DESTINATION lib
 )
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/includes/
     DESTINATION include
 )
