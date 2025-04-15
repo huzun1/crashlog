@@ -1,8 +1,8 @@
+#include <crashlog/parser.h>
 #include <windows.h>
 
 #include <cstdio>
 
-#include "../src/parser.h"
 
 LONG WINAPI TopLevelExceptionFilter(struct _EXCEPTION_POINTERS *ExceptionInfo) {
 	crashlog::initSym();

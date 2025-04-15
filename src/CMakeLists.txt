@@ -2,15 +2,12 @@ cmake_minimum_required(VERSION 3.10.0)
 
 add_library(crashlog STATIC
     exception_info.cpp
-    exception_info.h
     internal.cpp
-    internal.h
     parser.cpp
-    parser.h
 )
 
 target_include_directories(crashlog PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/includes>
     $<INSTALL_INTERFACE:include>
 )
 

@@ -1,14 +1,13 @@
-#include "parser.h"
-
-#include <DbgHelp.h>
+#include <crashlog/exception_info.h>
+#include <crashlog/internal.h>
+#include <crashlog/parser.h>
 #include <windows.h>
 
 #include <format>
 #include <optional>
 #include <sstream>
 
-#include "exception_info.h"
-#include "internal.h"
+#include "DbgHelp.h"
 
 #pragma comment(lib, "DbgHelp.lib")
 

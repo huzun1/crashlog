@@ -1,11 +1,12 @@
-#include "internal.h"
-
-#include <DbgHelp.h>
+#include <Windows.h>
+#include <crashlog/exception_info.h>
+#include <crashlog/internal.h>
+#include <crashlog/parser.h>
 #include <processthreadsapi.h>
 
 #include <vector>
 
-#include "exception_info.h"
+#include "DbgHelp.h"
 
 #pragma comment(lib, "DbgHelp.lib")
 

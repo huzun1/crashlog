@@ -1,7 +1,5 @@
 
-#include "exception_info.h"
-
-#include <DbgHelp.h>
+#include <crashlog/exception_info.h>
 #include <processthreadsapi.h>
 #include <windows.h>
 
@@ -10,6 +8,8 @@
 #include <map>
 #include <optional>
 #include <sstream>
+
+#include "DbgHelp.h"
 
 using namespace crashlog;
 
