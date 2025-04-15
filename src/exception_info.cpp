@@ -19,7 +19,7 @@ Address crashlog::parseAddress(void* rawAddress) {
 	symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
 	symbol->MaxNameLen = MAX_SYM_NAME;
 
-	std::string symboled;
+	std::optional<std::string> symboled;
 	bool result = SymFromAddr(GetCurrentProcess(), reinterpret_cast<uintptr_t>(rawAddress), nullptr, symbol);
 	if (result) {
 		symboled = symbol->Name;
