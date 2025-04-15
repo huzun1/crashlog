@@ -7,7 +7,7 @@ add_library(crashlog STATIC
 )
 
 target_include_directories(crashlog PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/includes>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../includes>
     $<INSTALL_INTERFACE:include>
 )
 
@@ -15,6 +15,6 @@ install(TARGETS crashlog
     EXPORT crashlogTargets
     ARCHIVE DESTINATION lib
 )
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/includes/
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../includes/
     DESTINATION include
 )
