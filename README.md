@@ -1,5 +1,8 @@
 # Crashlog
 
+> [!CAUTION]
+> This library currently supports only for Windows x64 applications
+
 Simple library to convert exceptions raised at the top level into immediately readable
 
 # Example of output:
