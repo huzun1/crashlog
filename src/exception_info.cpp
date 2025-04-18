@@ -8,6 +8,7 @@
 #include <map>
 #include <optional>
 #include <sstream>
+#include <format>
 
 #include "DbgHelp.h"
 
