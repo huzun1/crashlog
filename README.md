@@ -46,6 +46,7 @@ FetchContent_MakeAvailable(crashlog)
 target_link_libraries(YOUR_PROJECT crashlog)
 ```
 - Add an exception filter by using `SetUnhandledExceptionFilter`
+- Just use it.
 ```cpp
 #include <crashlog/parser.h>
 #include <windows.h>
