@@ -1,7 +1,11 @@
 #pragma once
 
-#ifndef CRASHLOG_NO_WINDOWS_H
-#include "Windows.h"  // IWYU pragma: keep
+#ifdef _WIN64
+#define CRASHLOG_WIN64
+#endif
+
+#if defined(CRASHLOG_WIN64) && !defined(CRASHLOG_NO_WINDOWS_H)
+#include <Windows.h>  // IWYU pragma: keep
 #endif
 
 #include "crashlog/exception.hpp" // IWYU pragma: keep
