@@ -3,14 +3,13 @@
 #include <Windows.h>
 #include <DbgHelp.h>
 #include <psapi.h>
-#include <cstdint>
 
 void crashlog::win64::SymbolResolver::loadAllSymbols() {
 	HMODULE modules[1024];
 	DWORD capacityBytesNeeded;
 	if (EnumProcessModules(GetCurrentProcess(), modules, sizeof(modules), &capacityBytesNeeded)) {
 		DWORD numModules = capacityBytesNeeded / sizeof(HMODULE);
-		for (uint32_t i = 0; i < numModules; i++) {
+		for (DWORD i = 0; i < numModules; i++) {
 			TCHAR moduleFileName[MAX_PATH];
 			if (!GetModuleFileNameEx(GetCurrentProcess(), modules[i], moduleFileName, sizeof(moduleFileName) / sizeof(TCHAR))) {
 				continue;

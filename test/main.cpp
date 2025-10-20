@@ -3,6 +3,7 @@
 #include <cstdio>
 
 #define CRASHLOG_WIN64
+#define CRASHLOG_NO_WINDOWS_H
 #include <crashlog/parser.hpp>
 
 LONG WINAPI TopLevelExceptionFilter(struct _EXCEPTION_POINTERS *exceptionInfo) {

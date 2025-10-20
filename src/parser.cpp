@@ -23,7 +23,7 @@ void parser::initialize() {
 }
 
 #ifdef CRASHLOG_WIN64
-crashlog::Exception parse(EXCEPTION_POINTERS* ptr) {
+crashlog::Exception parser::parse(EXCEPTION_POINTERS* ptr) {
 	return crashlog::win64::parse(ptr);
 }
 #endif
