@@ -1,21 +1,12 @@
-#include <crashlog/parser.h>
-#include <windows.h>
+#include <Windows.h>
 
 #include <cstdio>
 
-LONG WINAPI TopLevelExceptionFilter(struct _EXCEPTION_POINTERS *ExceptionInfo) {
-	crashlog::initSym();
-	crashlog::loadSym();
+#define CRASHLOG_WIN64
+#include <crashlog/parser.hpp>
 
-	auto info = crashlog::parseException(ExceptionInfo);
-	printf("\n======================================\n");
-	printf("An exception has been occured!\n");
-	printf("%s\n", crashlog::exceptionInfoToString(info).c_str());
-	printf("Stack Trace:\n");
-	printf("%s\n", crashlog::createStackTraceString(info).c_str());
-	printf("Stack Dumps:\n");
-	printf("%s\n", crashlog::createStackDumpString(ExceptionInfo).c_str());
-
+LONG WINAPI TopLevelExceptionFilter(struct _EXCEPTION_POINTERS *exceptionInfo) {
+	crashlog::parser::initialize();
 	return 0;
 }
 
