@@ -36,8 +36,8 @@ LONG WINAPI TopLevelExceptionFilter(struct _EXCEPTION_POINTERS* exceptionInfo) {
 
 	printf("=========== Registers ================\n");
 	for (const auto& [regName, regValue] : info.registers) {
-        printf("%s: %llx\n", regName.c_str(), regValue);
-    }
+		printf("%s: %llx\n", regName.c_str(), regValue);
+	}
 
 	return 0;
 }
