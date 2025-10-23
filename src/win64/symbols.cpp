@@ -66,6 +66,6 @@ std::optional<crashlog::LineInfo> symbols::line(uintptr_t address) {
 	memset(&lineInfo, 0, sizeof(IMAGEHLP_LINE64));
 	lineInfo.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
 	DWORD dwDisplacement;
-	bool getLineFromAddr64Result = SymGetLineFromAddr64(GetCurrentProcess(), reinterpret_cast<uintptr_t>(address), &dwDisplacement, &lineInfo);
+	bool getLineFromAddr64Result = SymGetLineFromAddr64(GetCurrentProcess(), address, &dwDisplacement, &lineInfo);
 	return getLineFromAddr64Result ? std::optional<crashlog::LineInfo>({lineInfo.FileName, static_cast<uint32_t>(lineInfo.LineNumber)}) : std::nullopt;
 }
