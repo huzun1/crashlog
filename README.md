@@ -7,33 +7,48 @@ Simple library to convert exceptions raised at the top level into immediately re
 
 # Example of output:
 ```
-Creating exception handler -> 00007FF7926C1000
+Creating exception handler -> 00007FF617BE1000
 Throwing an exception: memset(nullptr, 0, 1)
+Exception occurred!
 
-======================================
-An exception has been occured!
-Address=memset (0x7ffa0ee402fe)
-Type=EXCEPTION_ACCESS_VIOLATION (0xc0000005)
- - ViolationName=WRITE_ACCESS_VIOLATION
- - ViolationAddress=0x0
-
-Stack Trace:
-memset (0x7ffa0ee402fe)
-C:\Users\ericdoa\Documents\Proj\Cpp\crashlog\test\main.cpp L29 - main (0x7ff7926c11a9)
-D:\a\_work\1\s\src\vctools\crt\vcstartup\src\startup\exe_common.inl L79 - invoke_main (0x7ff792728039)
-D:\a\_work\1\s\src\vctools\crt\vcstartup\src\startup\exe_common.inl L288 - __scrt_common_main_seh (0x7ff792728172)
-D:\a\_work\1\s\src\vctools\crt\vcstartup\src\startup\exe_common.inl L331 - __scrt_common_main (0x7ff7927281fe)
-D:\a\_work\1\s\src\vctools\crt\vcstartup\src\startup\exe_main.cpp L17 - mainCRTStartup (0x7ff79272821e)
-BaseThreadInitThunk (0x7ffa49af7374)
-RtlUserThreadStart (0x7ffa49c3cc91)
-
-Stack Dumps:
-RAX=0x000000000000, RCX=0x000000000001, RDX=0x000000000000, RBX=0x000000000000
-Rsp=0x00770c8ff938, Rbp=0x000000000000, Rsi=0x000000000000, Rdi=0x000000000000
-R8=0x000000000001, R9=0x7ffa0ee402fe, R10=0x7ffa0ee20000, R11=0x000000000000
-R9=0x7ffa0ee402fe, R10=0x7ffa0ee20000, R11=0x000000000000, R12=0x000000000000
-R13=0x000000000000 R14=0x000000000000, R15=0x000000000000, Rip=0x7ffa0ee402fe
+========= Exception Info ==========
+Exception At: memset (VCRUNTIME140D + 0x0x225ee)
+Exception Code: c0000005 (EXCEPTION_ACCESS_VIOLATION)
+  violation_type_name: WRITE
+  violation_type: 1
+  address: 0
+========= Stack Trace ===========
+memset (VCRUNTIME140D + 0x0x225ee)
+main (crashlog_test + 0x0x169e) [C:\Users\babar\dev\cpp\crashlog\test\main.cpp:54]
+invoke_main (crashlog_test + 0x0x87839) [D:\a\_work\1\s\src\vctools\crt\vcstartup\src\startup\exe_common.inl:79]
+__scrt_common_main_seh (crashlog_test + 0x0x87972) [D:\a\_work\1\s\src\vctools\crt\vcstartup\src\startup\exe_common.inl:288]
+__scrt_common_main (crashlog_test + 0x0x879fe) [D:\a\_work\1\s\src\vctools\crt\vcstartup\src\startup\exe_common.inl:331]
+mainCRTStartup (crashlog_test + 0x0x87a1e) [D:\a\_work\1\s\src\vctools\crt\vcstartup\src\startup\exe_main.cpp:17]
+BaseThreadInitThunk (KERNEL32 + 0x0x2e8d7)
+RtlUserThreadStart (ntdll + 0x0x8c53c)
+=========== Registers ================
+rax: 0
+rbp: 0
+rbx: 0
+rsp: 1000ff878
+rdi: 0
+rcx: 1
+rsi: 0
+rdx: 0
+r8: 1
+r9: 7ffab3a325ee
+r10: 7ffab3a10000
+r11: 0
+r12: 0
+r13: 0
+r14: 0
+r15: 0
+rip: 7ffab3a325ee
 ```
+
+# TODO
+- Win32 support
+- XMM registers? but idk who need it
 
 # Quick Start
 
@@ -41,38 +56,65 @@ R13=0x000000000000 R14=0x000000000000, R15=0x000000000000, Rip=0x7ffa0ee402fe
 ```cmake
 FetchContent_Declare(
   crashlog
-  GIT_REPOSITORY https://github.com/0liteyear/crashlog.git
+  GIT_REPOSITORY https://github.com/huzun1/crashlog.git
   GIT_TAG        main
 )
 FetchContent_MakeAvailable(crashlog)
 ~
 target_link_libraries(YOUR_PROJECT crashlog)
 ```
+
 - Add an exception filter by using `SetUnhandledExceptionFilter`
-- Just use it.
+- Now, Just use it 🚀
+
 ```cpp
-#include <crashlog/parser.h>
-#include <windows.h>
+#include <Windows.h>
 
 #include <cstdio>
+#include <sstream>
+#include <string>
 
-LONG WINAPI TopLevelExceptionFilter(struct _EXCEPTION_POINTERS *ExceptionInfo) {
-	crashlog::initSym();
-	crashlog::loadSym();
+#include "crashlog/address.hpp"
+#include "crashlog/exception.hpp"
 
-	auto info = crashlog::parseException(ExceptionInfo);
-	printf("\n======================================\n");
-	printf("An exception has been occured!\n");
-	printf("%s\n", crashlog::exceptionInfoToString(info).c_str());
-	printf("Stack Trace:\n");
-	printf("%s\n", crashlog::createStackTraceString(info).c_str());
-	printf("Stack Dumps:\n");
-	printf("%s\n", crashlog::createStackDumpString(ExceptionInfo).c_str());
+#define CRASHLOG_NO_WINDOWS_H
+#include <crashlog/crashlog.hpp>
+
+LONG WINAPI TopLevelExceptionFilter(struct _EXCEPTION_POINTERS* exceptionInfo) {
+	printf("Exception occurred!\n\n");
+
+	auto info = crashlog::parse(exceptionInfo);
+
+	printf("========= Exception Info ==========\n");
+	crashlog::ExceptionMetadata metadata = info.exceptionMetadata;
+	printf("Exception At: %s\n", crashlog::addressToString(metadata.address).c_str());
+	printf("Exception Code: %x (%s)\n", metadata.exceptionCode, metadata.exceptionName.c_str());
+	for (const auto& [key, value] : metadata.additionalInfo) {
+		std::string valString = std::visit([](auto&& arg) -> std::string {
+			std::ostringstream oss;
+			oss << arg;
+			return oss.str();
+		}, value);
+		printf("  %s: %s\n", key.c_str(), valString.c_str());
+	}
+
+	printf("========= Stack Trace ===========\n");
+	crashlog::StackTrace stackTrace = info.stacktrace;
+	for (const auto& frame : stackTrace) {
+		printf("%s\n", crashlog::addressToString(frame).c_str());
+	}
+
+	printf("=========== Registers ================\n");
+	for (const auto& [regName, regValue] : info.registers) {
+        printf("%s: %llx\n", regName.c_str(), regValue);
+    }
 
 	return 0;
 }
 
 int main() {
+   	crashlog::initialize();
+
 	printf("Creating exception handler -> %p\n", &TopLevelExceptionFilter);
 	SetUnhandledExceptionFilter(&TopLevelExceptionFilter);
 
