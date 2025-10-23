@@ -13,5 +13,7 @@ void crashlog::initialize() {
 crashlog::Exception crashlog::parse(EXCEPTION_POINTERS* ptr) {
 #ifdef CRASHLOG_WIN64
 	return crashlog::win64::parse(ptr);
+#else
+	return crashlog::Exception();
 #endif
 }
