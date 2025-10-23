@@ -4,7 +4,7 @@
 
 std::string crashlog::addressToString(crashlog::AddressMetadata addr) {
     std::string result;
-    std::string mod = std::format("{} + 0x{:#x}", addr.moduleName, addr.moduleOffset);
+    std::string mod = std::format("{} + {:#x}", addr.moduleName, addr.moduleOffset);
     if (addr.symbol) {
         result += std::format("{} ({})", *addr.symbol, mod);
     } else {
