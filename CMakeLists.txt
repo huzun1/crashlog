@@ -6,4 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_subdirectory(src)
-add_subdirectory(test)
+
+if(PROJECT_IS_TOP_LEVEL)
+    add_subdirectory(test)
+endif()
