@@ -57,7 +57,7 @@ std::optional<std::string> symbols::symbol(uintptr_t address) {
 	symbolInfo->SizeOfStruct = sizeof(SYMBOL_INFO);
 	symbolInfo->MaxNameLen = MAX_SYM_NAME;
 
-	bool symFromAddrResult = SymFromAddr(GetCurrentProcess(), reinterpret_cast<uintptr_t>(address), nullptr, symbolInfo);
+	bool symFromAddrResult = SymFromAddr(GetCurrentProcess(), address, nullptr, symbolInfo);
 	return symFromAddrResult ? std::optional<std::string>(symbolInfo->Name) : std::nullopt;
 }
 
