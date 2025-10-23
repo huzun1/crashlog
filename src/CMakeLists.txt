@@ -1,9 +1,12 @@
 cmake_minimum_required(VERSION 3.10.0)
 
 add_library(crashlog STATIC
-    exception_info.cpp
-    internal.cpp
-    parser.cpp
+    crashlog.cpp
+    address.cpp
+    win64/parser.cpp
+    win64/stacktrace.cpp
+    win64/symbols.cpp
+    win64/exception.cpp
 )
 
 target_include_directories(crashlog PUBLIC
