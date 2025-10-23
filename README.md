@@ -74,11 +74,10 @@ target_link_libraries(YOUR_PROJECT crashlog)
 #include <sstream>
 #include <string>
 
-#include "crashlog/address.hpp"
-#include "crashlog/exception.hpp"
-
 #define CRASHLOG_NO_WINDOWS_H
 #include <crashlog/crashlog.hpp>
+#include <crashlog/address.hpp>
+#include <crashlog/exception.hpp>
 
 LONG WINAPI TopLevelExceptionFilter(struct _EXCEPTION_POINTERS* exceptionInfo) {
 	printf("Exception occurred!\n\n");
