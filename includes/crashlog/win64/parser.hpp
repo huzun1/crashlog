@@ -1,14 +1,13 @@
 #pragma once
 
+#ifndef CRASHLOG_NO_WINDOWS_H
 #include <Windows.h>
-#include <winnt.h>
+#endif
 
 #include <crashlog/exception.hpp>
 
-namespace crashlog {
-namespace win64 {
-    void initialize();
+namespace crashlog::win64 {
+void initialize();
 
-    crashlog::Exception parse(EXCEPTION_POINTERS* ptr);
-};
-};	// namespace crashlog
+crashlog::Exception parse(EXCEPTION_POINTERS* ptr);
+};	// namespace crashlog::win64
