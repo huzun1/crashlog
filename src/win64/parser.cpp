@@ -25,7 +25,7 @@ void win64::initialize() {
 	crashlog::win64::symbols::loadAllSymbols();
 }
 
-// FIXME: more better implementation (we do not define static shits in here)
+// FIXME: more better implementation (we do not define static stuff in here)
 AddressMetadata parseAddress(uintptr_t address) {
 	AddressMetadata metadata;
 	metadata.address = address;
